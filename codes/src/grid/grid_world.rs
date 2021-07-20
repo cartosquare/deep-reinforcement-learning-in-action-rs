@@ -7,7 +7,7 @@ pub struct GridWorld {
     pub board: GridBoard,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Action {
     UP,
     DOWN,

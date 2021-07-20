@@ -199,5 +199,5 @@ fn main() {
 
     train_model(&vs, &model, 1000, String::from("static"));
 
-    test_model(&model, true, String::from("random"));
+    test_model(&model, true, String::from("static"));
 }
