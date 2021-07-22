@@ -47,6 +47,12 @@ fn train_model(vs: &nn::VarStore, model: &impl Module, epochs: i64, mode: String
     let mut replay: VecDeque<(Tensor, i64, f64, Tensor, i64)> = VecDeque::with_capacity(memory_size);
     let max_move = 50;
 
+    // update frequency for synchronizing the
+    // target model parameters
+    let sync_frequence = 500;
+    let mut target_model = model.clone();
+    let mut j = 0;
+
     // optimizer
     let mut optimizer = nn::Adam::default().build(&vs, 0.001).unwrap();
     // the main loop
@@ -65,6 +71,7 @@ fn train_model(vs: &nn::VarStore, model: &impl Module, epochs: i64, mode: String
         let mut status = 1;
         let mut moves = 0;
         while status == 1 {
+            j = j + 1;
             moves = moves + 1;
 
             let q_value = tch::no_grad(|| model.forward(&state));
@@ -146,7 +153,7 @@ fn train_model(vs: &nn::VarStore, model: &impl Module, epochs: i64, mode: String
 
                 // compute q values for the next state, but not get gradients
                 // q2 size: [batch_size, 4]
-                let q2 = tch::no_grad(|| model.forward(&state2_batch));
+                let q2 = tch::no_grad(|| target_model.forward(&state2_batch));
                 // println!("q2 size: {:?}", q2.size());
 
                 // println!("action size: {:?}", action_batch.size());
@@ -176,6 +183,10 @@ fn train_model(vs: &nn::VarStore, model: &impl Module, epochs: i64, mode: String
                 }
                 losses.push((steps as f64, l));
                 steps = steps + 1;
+
+                if j % sync_frequence == 0 {
+                    target_model = model.clone();
+                }
             }
 
             if reward != -1.0 || moves > max_move {
@@ -194,7 +205,7 @@ fn train_model(vs: &nn::VarStore, model: &impl Module, epochs: i64, mode: String
     }
 
     xy_scatter_plot(
-        String::from("qlearning_experience_replay.svg"),
+        String::from("qlearning_target_model.svg"),
         losses,
         -100.0,
         (steps + 1000) as f64,

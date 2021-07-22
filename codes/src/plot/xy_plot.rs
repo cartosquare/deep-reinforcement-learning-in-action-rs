@@ -25,7 +25,8 @@ pub fn xy_scatter_plot(
 	let plot: Plot = Plot::new(xy).point_style(
 		PointStyle::new()
 			.marker(PointMarker::Circle)
-			.colour("#DD3355"),
+			.colour("#DD3355")
+			.size(1.0),
 	);
 
 	let view = ContinuousView::new()

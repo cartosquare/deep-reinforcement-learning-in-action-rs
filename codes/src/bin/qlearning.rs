@@ -122,7 +122,7 @@ fn train_model(vs: &nn::VarStore, model: &impl Module, epochs: i64, mode: String
         }
     }
     xy_scatter_plot(
-        String::from("listing.svg"),
+        String::from("qlearning.svg"),
         losses,
         (epochs - 1000) as f64,
         (epochs + 1000) as f64,
